@@ -22,7 +22,7 @@ import java.io.IOException;
  * Documentation
  * 1. Create new Sheet Variable and use ExcelUtils.initialisesheet(context, sheetname)
  * Remember the sheet name is not the .xls file but the sheet name in that file
- * 2. Use the ExcelUtils.writeValueInLocation(sheetName, rowNumber, columnNumber and the value (in string)
+ * 2. Use the ExcelUtils.setValueInLocation(sheetName, rowNumber, columnNumber and the value (in string)
  * 3. To write the data to the file use the ExcelUtils.writeSheetToFile(context, fileName, workbook)
  * (Normally use the sheet.getWorkbook() to get the corresponding workbook.
  * 4. To read from a cell use the getValueFromLocation(context, fileName, sheetName, rowNumber, columnNumber)
@@ -46,7 +46,7 @@ public class ExcelUtils {
     }
 
 
-    public static boolean writeValueInLocation(Sheet sheet, int rowNumber, int columnNumber, String value) {
+    public static boolean setValueInLocation(Sheet sheet, int rowNumber, int columnNumber, String value) {
         Row row = null;
         if (sheet.getRow(rowNumber) == null) {
             row = sheet.createRow(rowNumber);
@@ -63,7 +63,7 @@ public class ExcelUtils {
         }
         column.setCellValue(value);
         if (column.getStringCellValue().equals(value)) {
-            Log.d(TAG, "writeValueInLocation: " + value + " saved in cell " + rowNumber + ", " + columnNumber);
+            Log.d(TAG, "setValueInLocation: " + value + " saved in cell " + rowNumber + ", " + columnNumber);
             return true;
         } else {
             return false;
@@ -92,9 +92,9 @@ public class ExcelUtils {
     }
 
     public static Sheet getSheetfromString(Context context, String fileName, String sheetName) {
-            Sheet returnSheet;
+        Sheet returnSheet;
         try {
-            returnSheet = getSheets(context,fileName).getSheet(sheetName);
+            returnSheet = getSheets(context, fileName).getSheet(sheetName);
         } catch (IOException e) {
             returnSheet = null;
             Toast.makeText(context, "No sheet found", Toast.LENGTH_SHORT).show();
@@ -186,23 +186,51 @@ public class ExcelUtils {
     }
 
     public static void deleteValueFromLocation(Sheet sheet, int rowNumber, int columnNumber) {
-        ExcelUtils.writeValueInLocation(sheet,rowNumber,columnNumber,"");
-    }
-    
-    public static void replaceValueInLocation(Sheet sheet, int rowNumber, int columnNumber,String newString) {
-        ExcelUtils.writeValueInLocation(sheet,rowNumber,columnNumber,newString);
+        ExcelUtils.setValueInLocation(sheet, rowNumber, columnNumber, "");
     }
 
-    public static boolean findAndRemove(String searchString , Context context, String fileName,Sheet sheet, String sheetName, int startingRowNumber, int startingColumnNumber, int count) {
-        int location = getRowLocationForValue(searchString,context,fileName,sheetName,startingRowNumber,startingColumnNumber,count);
-        if(location!=0){
-            deleteValueFromLocation(sheet,location,startingColumnNumber);
-            Log.d(TAG, "findAndRemove: Deleted");
+    public static void replaceValueInLocation(Sheet sheet, int rowNumber, int columnNumber, String newString) {
+        ExcelUtils.setValueInLocation(sheet, rowNumber, columnNumber, newString);
+    }
+
+    public static boolean findAndRemove(String searchString, Context context, String fileName, Sheet sheet, String sheetName, int startingRowNumber, int startingColumnNumber, int count) {
+        int location = getRowLocationForValue(searchString, context, fileName, sheetName, startingRowNumber, startingColumnNumber, count);
+        if (location != 0) {
+            deleteValueFromLocation(sheet, location, startingColumnNumber);
+            Log.d(TAG, "findAndRemove: Deleted " + location + ", " + startingColumnNumber);
             Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show();
             return true;
-        }else{
+        } else {
             Log.d(TAG, "findAndRemove: Unable to find");
             Toast.makeText(context, "Unable to delete", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+    }
+
+    public static boolean isLocationEmpty(Context context, String fileName, String sheetName, int rowNumber, int columnNumber) {
+        if (getValueFromLocation(context, fileName, sheetName, rowNumber, columnNumber).equals("")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean addValueToNearestEmpty(Context context, String fileName, Sheet sheet, String sheetName, int startingRowNumber, int startingColumnNumber, int count, String value) {
+        int emptyLocation = findNearestEmpty(context, fileName, sheetName, startingRowNumber, startingColumnNumber, count);
+        if(isLocationEmpty(context, fileName, sheetName, emptyLocation, startingColumnNumber)) {
+            if (emptyLocation != 0) {
+                if (setValueInLocation(sheet, emptyLocation, startingColumnNumber, value)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                Log.d(TAG, "addValueToNearestEmpty: Error");
+                return false;
+
+            }
+        }else{
             return false;
         }
 

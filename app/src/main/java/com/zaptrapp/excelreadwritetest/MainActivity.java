@@ -32,36 +32,41 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
         /*Write to random area*/
-        Sheet sheet = ExcelUtils.initialiseSheet(this,"Sales");
-        if(ExcelUtils.writeValueInLocation(sheet,8,37,"Poornima")){
+        Sheet sheet = ExcelUtils.initialiseSheet(this, "Sales");
+        if (ExcelUtils.setValueInLocation(sheet, 8, 37, "Poornima")) {
             Log.d(TAG, "onCreate: Poornima successful");
         }
-        ExcelUtils.writeValueInLocation(sheet,90,5,"Nishanth");
+        ExcelUtils.setValueInLocation(sheet, 90, 5, "Nishanth");
 
 //        int searchLocation = ExcelUtils.getRowLocationForValue("Nishanth",this,"excel5.xls","Sales",0,5,100);
 
 
-        int rowNumber =90;
-        int columnNumber=5;
-        String value="";
+        int rowNumber = 90;
+        int columnNumber = 5;
+        String value = "";
 
 
-        ExcelUtils.findAndRemove("Nishanth",this,"excel5.xls",sheet,"Sales",0,5,100);
+        ExcelUtils.findAndRemove("Nishanth", this, "excel5.xls", sheet, "Sales", 0, 5, 100);
 
 
-        for(int i=0;i<200;i++){
+        for (int i = 0; i < 200; i++) {
 
-            ExcelUtils.writeValueInLocation(sheet,i,7,"String "+i );
+            ExcelUtils.setValueInLocation(sheet, i, 7, "String " + i);
         }
 
-        ExcelUtils.findAndRemove("String 67",this,"excel5.xls",sheet,"Sales",0,7,100);
+        ExcelUtils.findAndRemove("String 67", this, "excel5.xls", sheet, "Sales", 0, 7, 100);
+        ExcelUtils.findAndRemove("String 78", this, "excel5.xls", sheet, "Sales", 0, 7, 100);
+//
+        int searchLocation = ExcelUtils.findNearestEmpty(this, "excel5.xls", "Sales", 0, 7, 100);
+        Toast.makeText(this, "Location is " + searchLocation, Toast.LENGTH_SHORT).show();
 
-        int searchLocation = ExcelUtils.findNearestEmpty(this,"excel5.xls","Sales",0,7,100);
-        Toast.makeText(this, "Location is "+searchLocation, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "onCreate: searchLocation is " + searchLocation);
+        if (ExcelUtils.isLocationEmpty(this, "excel5.xls", "Sales", 67, 7)) {
 
-        Log.d(TAG, "onCreate: searchLocation is "+searchLocation);
-
-        ExcelUtils.writeSheetToFile(this,"excel5.xls",sheet.getWorkbook());
+            ExcelUtils.addValueToNearestEmpty(this, "excel5.xls", sheet, "Sales", 0, 7, 100, "Replaced String");
+        }
+////
+        ExcelUtils.writeSheetToFile(this, "excel5.xls", sheet.getWorkbook());
 
 //        Log.d(TAG, "onCreate: Location "+searchLocation);
 
@@ -69,12 +74,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     private void addRandomArrayList() {
         listProductName = new ArrayList<>();
-        for(int i=0;i<100;i++){
-            listProductName.add(i,"String "+i);
+        for (int i = 0; i < 100; i++) {
+            listProductName.add(i, "String " + i);
         }
     }
 
@@ -91,16 +94,16 @@ public class MainActivity extends AppCompatActivity {
         boolean success = false;
 
         try {
-            Sheet sheet1 = ExcelUtils.initialiseSheet(context,"Sales");
+            Sheet sheet1 = ExcelUtils.initialiseSheet(context, "Sales");
 
 
-            ExcelUtils.writeValueInLocation(sheet1,0,0, String.valueOf(34));
+            ExcelUtils.setValueInLocation(sheet1, 0, 0, String.valueOf(34));
 
-            Row row = sheet1.createRow(Integer.parseInt(ExcelUtils.getValueFromLocation(context,fileName,"Sales",0,0)));
+            Row row = sheet1.createRow(Integer.parseInt(ExcelUtils.getValueFromLocation(context, fileName, "Sales", 0, 0)));
 //            row = sheet1.createRow(1);
-            for(int i=0;i<listProductName.size();i++){
-                ExcelUtils.writeValueInLocation(sheet1,0,i,listProductName.get(i));
-                Log.d(TAG, "forLoop: "+listProductName.get(i));
+            for (int i = 0; i < listProductName.size(); i++) {
+                ExcelUtils.setValueInLocation(sheet1, 0, i, listProductName.get(i));
+                Log.d(TAG, "forLoop: " + listProductName.get(i));
             }
 
 
@@ -110,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(context, "Error in saveExcelFile", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "saveExcelFile: "+e.toString());
+            Log.d(TAG, "saveExcelFile: " + e.toString());
         }
         return success;
     }
